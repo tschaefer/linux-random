@@ -1,6 +1,6 @@
 # linux-random
 
-Seed entropy and harvest random.
+Seed entropy and harvest random bytes.
 
 ## Introduction
 

@@ -6,7 +6,7 @@ use warnings;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
-    'ABSTRACT'   => 'Methods to request Linux kernel entropy input pool.',
+    'ABSTRACT'   => 'Seed entropy and harvest random bytes.',
     'AUTHOR'     => 'Tobias Schaefer <github@blackox.org>',
     'DISTNAME'   => 'Linux-Random',
     'META_MERGE' => {

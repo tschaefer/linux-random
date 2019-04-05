@@ -140,7 +140,7 @@ __END__
 
 =head1 NAME
 
-Linux::Random - Seed entropy and harvest random
+Linux::Random - Seed entropy and harvest random bytes.
 
 =head1 DESCRIPTION
 
@@ -168,8 +168,8 @@ clock) to the pools.
 
 =head2 rnd_get_random $bytes, $device, $format
 
-Retrieve given bytes of random from device (default: urandom) in binary
-(default) or base64 encoded format.
+Retrieve random bytes from device (default: urandom) in binary (default) or
+base64 encoded format.
 
     use Linux::Random qw( rnd_get_random );
 
