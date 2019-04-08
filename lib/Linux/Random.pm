@@ -3,8 +3,6 @@ package Linux::Random;
 use strict;
 use warnings;
 
-use vars qw( @EXPORT_OK $VERSION );
-
 use base qw(Exporter);
 our @EXPORT_OK = qw(
   rnd_get_entropy_count
@@ -15,7 +13,7 @@ our @EXPORT_OK = qw(
   rnd_get_random
 );
 
-$VERSION = '0.01';
+our $VERSION = '0.01';
 
 use Fcntl;
 use Carp qw(croak);
@@ -126,7 +124,7 @@ sub rnd_get_random {
 
     return $format eq 'binary'
       ? $random
-      : sprintf "-----BEGIN RANDOM DATA-----\n%s-----END RANDOM DATA-----\n",
+      : sprintf "-----BEGIN RANDOM DATA-----\n%s-----END RANDOM DATA-----",
       encode_base64($random);
 }
 
