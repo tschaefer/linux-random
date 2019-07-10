@@ -36,13 +36,13 @@ sub _rnd_ioctl_request {
     $params ||= '0000';
 
     sysopen my $fh, $RNDDEVICE, $mode
-      or croak( sprintf "%s: %s", $RNDDEVICE, $! );
+      or croak( sprintf "%s: %s", $RNDDEVICE, $OS_ERROR );
 
     my $rc = ioctl $fh, $request, $params;
-    croak( sprintf "ioctl: %s", $! ) if ( $rc < 0 );
+    croak( sprintf "ioctl: %s", $OS_ERROR ) if ( $rc < 0 );
 
     close $fh
-      or croak( sprintf "%s: %s", $RNDDEVICE, $! );
+      or croak( sprintf "%s: %s", $RNDDEVICE, $OS_ERROR );
 
     return $mode eq O_RDONLY ? $params : undef;
 }
@@ -114,13 +114,13 @@ sub rnd_get_random {
     croak( sprintf "%s: no such format", $format ) if ( !$out{$format} );
 
     sysopen my $fh, $device, O_RDONLY
-      or croak( sprintf "%s: %s", $device, $! );
+      or croak( sprintf "%s: %s", $device, $OS_ERROR );
 
     my $random;
     sysread $fh, $random, $bytes;
 
     close $fh
-      or croak( sprintf "%s: %s", $device, $! );
+      or croak( sprintf "%s: %s", $device, $OS_ERROR );
 
     return $format eq 'binary'
       ? $random
