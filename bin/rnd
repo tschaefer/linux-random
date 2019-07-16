@@ -1,0 +1,210 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+
+use Carp qw(croak carp);
+use English;
+use Getopt::Long;
+use Pod::Usage;
+
+use Linux::Random qw(
+  rnd_get_entropy_count
+  rnd_clear_pool
+  rnd_zap_entropy_count
+  rnd_add_to_entropy_count
+  rnd_add_entropy
+  rnd_get_random
+);
+
+sub print_usage {
+    pod2usage( -exitval => 255, -verbose => 0 );
+    return;
+}
+
+sub print_help {
+    pod2usage(
+        -exitval  => 0,
+        -verbose  => 99,
+        -sections => 'SYNOPSIS|OPTIONS|PARAMETERS',
+    );
+    return;
+}
+
+sub print_man {
+    pod2usage( -exitval => 0, -verbose => 2 );
+    return;
+}
+
+sub get_random {
+    my $opts;
+
+    GetOptions(
+        "device|d=s" => \$opts->{'device'},
+        "bytes|b=s"  => \$opts->{'bytes'},
+        "format|f=s" => \$opts->{'format'},
+    ) or print_usage();
+
+    $opts->{'device'} ||= 'urandom';
+    $opts->{'bytes'}  ||= 64;
+    $opts->{'format'} ||= 'binary';
+
+    $opts->{'device'} = '/dev/' . $opts->{'device'};
+
+    return rnd_get_random( $opts->{'bytes'}, $opts->{'device'},
+        $opts->{'format'} );
+}
+
+sub add_to_entropy_count {
+    my $bits = $ARGV[0];
+
+    if ( !$bits ) {
+        print "Missing argument.\n";
+        return print_usage();
+    }
+
+    if ( $bits !~ /^\+?[0-9]+$/ ) {
+        print "Bad arument.\n";
+        return print_usage();
+    }
+
+    return rnd_add_to_entropy_count($bits);
+}
+
+sub add_entropy {
+    my $file = $ARGV[0];
+
+    if ( !$file ) {
+        print "Missing argument.\n";
+        return print_usage();
+    }
+
+    my $fh;
+    my $seed = do {
+        local $/ = undef;
+        open $fh, '<', $file or croak("$file: $OS_ERROR");
+        <$fh>;
+    };
+    close $fh or carp("$file: $OS_ERROR");
+
+    return rnd_add_entropy($seed);
+}
+
+sub run {
+    my %ACTIONS = (
+        get_entropy_count    => { sub => \&rnd_get_entropy_count, show => 1 },
+        clear_pool           => { sub => \&rnd_clear_pool,        show => 0 },
+        zap_entropy_count    => { sub => \&rnd_clear_pool,        show => 0 },
+        add_to_entropy_count => { sub => \&add_to_entropy_count,  show => 0 },
+        add_entropy          => { sub => \&add_entropy,           show => 0 },
+        get_random           => { sub => \&get_random,            show => 1 },
+        man                  => { sub => \&print_man,             show => 0 },
+        help                 => { sub => \&print_help,            show => 0 },
+    );
+    my $action = $ARGV[0] || undef;
+    if ( !$action ) {
+        printf "Missing action.\n";
+        return print_usage();
+    }
+    shift @ARGV;
+
+    $action =~ s/-/_/g;
+    my $sub  = $ACTIONS{$action}{'sub'};
+    my $show = $ACTIONS{$action}{'show'};
+    if ( !$sub ) {
+        printf "Unknown action: %s\n", $action;
+        return print_usage();
+    }
+
+    my $out = eval { &$sub(); };
+    if ( $@ =~ /(.+) at .+/ ) {
+        print $1 . ".\n";
+        return print_usage();
+    }
+    print $out . "\n" if ($show);
+
+    return 0;
+}
+
+exit run();
+
+__END__
+
+=encoding utf8
+
+=head1 NAME
+
+rnd - Seed entropy and harvest random bytes.
+
+=head1 SYNOPSIS
+
+rnd get-entropy-count | zap-entropy-count | clear-pool
+
+rnd add-to-entropy-count BITS
+
+rnd add-entropy FILE
+
+rnd get-random [--device urandom | random] [--bytes NUM]
+[--format binary | base64]
+
+rnd help | man
+
+=head1 OPTIONS
+
+=head2 get-random
+
+=over 8
+
+=item B<--device|-d> random | urandom
+
+Random device (default: random).
+
+=item B<--bytes|-b> NUM
+
+Number of random bytes to receive (default: 64).
+
+=item B<--format|-f> binary | base64
+
+Output format (default: binary).
+
+=back
+
+=head1 PARAMETERS
+
+=over 8
+
+=item B<get-entropy-count>
+
+Retrieve the entropy count of the input pool.
+
+=item B<zap-entropy-count | clear-pool>
+
+Zero the entropy count of all pools and add some system data.
+
+=item B<add-to-entropy-count> BITS
+
+Increment or decrement the entropy count of the input pool.
+
+=item B<add-entropy-count> FILE
+
+Add some additional entropy to the input pool, incrementing the entropy count.
+
+=back
+
+=head1 DESCRIPTION
+
+rnd is a tool to interact with the Linux kernel random number source devices.
+For further information see man 4 random.
+
+=head1 AUTHORS
+
+Tobias Schäfer L<github@blackox.org>
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2019 by Tobias Schäfer.
+
+This is free software; you can redistribute it and/or modify it under the same
+terms as the Perl 5 programming language system itself.
+
+=cut

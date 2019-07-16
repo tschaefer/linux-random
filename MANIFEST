@@ -1,3 +1,4 @@
+bin/rnd
 lib/Linux/Random.pm
 Makefile.PL
 MANIFEST

@@ -9,6 +9,7 @@ WriteMakefile(
     'ABSTRACT'   => 'Seed entropy and harvest random bytes.',
     'AUTHOR'     => 'Tobias Schaefer <github@blackox.org>',
     'DISTNAME'   => 'Linux-Random',
+    'EXE_FILES'  => [ 'bin/rnd' ],
     'META_MERGE' => {
         resources => {
             'license'    => 'http://dev.perl.org/licenses',
