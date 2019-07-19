@@ -116,8 +116,12 @@ sub rnd_get_random {
     sysopen my $fh, $device, O_RDONLY
       or croak( sprintf "%s: %s", $device, $OS_ERROR );
 
-    my $random;
-    sysread $fh, $random, $bytes;
+    my ( $random, $rrandom, $rbytes, $lbytes ) = ( '', '', 0, 0 );
+    while ( $rbytes < $bytes ) {
+        $lbytes = $bytes - $rbytes;
+        $rbytes += sysread $fh, $rrandom, $lbytes;
+        $random .= $rrandom;
+    }
 
     close $fh
       or croak( sprintf "%s: %s", $device, $OS_ERROR );
