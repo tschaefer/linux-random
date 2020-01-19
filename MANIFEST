@@ -1,4 +1,9 @@
 bin/rnd
 lib/Linux/Random.pm
+t/00_base.t
+t/01_get_random.t
+t/02_clear_pool.t
+t/03_add_to_entropy_count.t
+t/04_add_entropy.t
 Makefile.PL
 MANIFEST
