@@ -38,5 +38,9 @@ inc/
 /pm_to_blib
 /*.zip
 
+### VSCode
+.vscode/
+*.code-workspace
+
 ### Custom
 *.bak

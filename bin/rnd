@@ -8,14 +8,7 @@ use English;
 use Getopt::Long;
 use Pod::Usage;
 
-use Linux::Random qw(
-  rnd_get_entropy_count
-  rnd_clear_pool
-  rnd_zap_entropy_count
-  rnd_add_to_entropy_count
-  rnd_add_entropy
-  rnd_get_random
-);
+use Linux::Random qw( :all );
 
 sub print_usage {
     pod2usage( -exitval => 255, -verbose => 0 );

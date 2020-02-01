@@ -3,8 +3,11 @@ package Linux::Random;
 use strict;
 use warnings;
 
-use base qw(Exporter);
-our @EXPORT_OK = qw(
+use Readonly;
+
+use Exporter 'import';
+
+Readonly::Array our @EXPORT_OK => qw(
   rnd_get_entropy_count
   rnd_clear_pool
   rnd_zap_entropy_count
@@ -13,15 +16,16 @@ our @EXPORT_OK = qw(
   rnd_get_random
 );
 
+Readonly::Hash our %EXPORT_TAGS => ( all => [@EXPORT_OK], );
+
 our $VERSION = '0.01';
 
 use Fcntl;
 use Carp qw(croak);
-use Readonly;
-use English;
+use English qw(-no_match_vars);
 use MIME::Base64 qw(encode_base64 decode_base64);
 
-Readonly my %RNDREQUEST => (
+Readonly::Hash my %RNDREQUEST => (
     RNDGETENTCNT   => 0x80045200,
     RNDCLEARPOOL   => 0x5206,
     RNDADDTOENTCNT => 0x40045201,
