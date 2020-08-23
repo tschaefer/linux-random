@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use Carp qw(croak carp);
-use English;
+use English qw(-no_match_vars);
 use Getopt::Long;
 use Pod::Usage;
 
@@ -74,7 +74,7 @@ sub add_entropy {
 
     my $fh;
     my $seed = do {
-        local $/ = undef;
+        local $RS = undef;
         open $fh, '<', $file or croak("$file: $OS_ERROR");
         <$fh>;
     };
@@ -110,7 +110,7 @@ sub run {
     }
 
     my $out = eval { &$sub(); };
-    if ( $@ =~ /(.+) at .+/ ) {
+    if ( $EVAL_ERROR =~ /(.+) at .+/ ) {
         print $1 . ".\n";
         return print_usage();
     }
