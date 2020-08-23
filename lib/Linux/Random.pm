@@ -1,5 +1,10 @@
 package Linux::Random;
 
+##! **Linux::Random** - Seed entropy and harvest random bytes.
+##!
+##! **Linux::Random** provides funtionality (via ioctl) to interact with the
+##! Linux kernel random pools. For further information see **man 4 random**.
+
 use strict;
 use warnings;
 
@@ -57,22 +62,28 @@ sub _rnd_has_permission {
     return;
 }
 
+### Retrieve the entropy count of the input pool.
 sub rnd_get_entropy_count {
     my $entropy = _rnd_ioctl_request( $RNDREQUEST{'RNDGETENTCNT'}, O_RDONLY );
 
     return unpack 'i', $entropy;
 }
 
+### Zero the entropy count of all pools and add some system data (such as wall
+### clock) to the pools.
 sub rnd_clear_pool {
     _rnd_has_permission();
 
     return _rnd_ioctl_request( $RNDREQUEST{'RNDCLEARPOOL'}, O_WRONLY );
 }
 
+### Zero the entropy count of all pools and add some system data (such as wall
+### clock) to the pools.
 sub rnd_zap_entropy_count {
     return rnd_clear_pool();
 }
 
+### Increment or decrement the entropy bit count of the input pool.
 sub rnd_add_to_entropy_count {
     my $count = shift;
 
@@ -82,6 +93,8 @@ sub rnd_add_to_entropy_count {
         O_WRONLY, pack 'i', $count );
 }
 
+### Add some additional entropy to the input pool, incrementing the entropy
+### count. Seed maybe in binary or base64 encoded format.
 sub rnd_add_entropy {
     my $seed = shift;
 
@@ -99,6 +112,17 @@ sub rnd_add_entropy {
     return _rnd_ioctl_request( $RNDREQUEST{'RNDADDTOENTCNT'}, O_WRONLY, $pool );
 }
 
+### Retrieve random bytes from device (default: urandom) in binary (default)
+### or base64 encoded format.
+###
+### ```
+###     my $rnd = Linux::Random::rnd_get_random(256, '/dev/random', 'base64');
+###     like( $rnd, qr/^-----BEGIN RANDOM DATA-----/
+###              && qr/-----END RANDOM DATA-----$/, 'got base64 encoded data');
+###
+###     $rnd = Linux::Random::rnd_get_random(256, '/dev/urandom', 'binary');
+###     is( length $rnd, 256, 'got 256 bytes binary data' );
+### ```
 sub rnd_get_random {
     my ( $bytes, $device, $format ) = @_;
 
